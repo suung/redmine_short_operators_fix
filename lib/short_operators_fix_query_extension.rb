@@ -47,10 +47,10 @@ module ShortOperatorsFix
         :integer => [ "=", ">=", "<=", "!*", "*" ] }
 
       cattr_reader :operators_by_filter_type
-      alias_method_chain :after_initialize, :custom_fields_api
-      alias_method_chain :add_short_filter, :custom_fields_api
-      alias_method_chain :validate, :custom_fields_api
-      alias_method_chain :sql_for_field, :custom_fields_api
+      alias_method_chain :after_initialize, :short_operators_fix
+      alias_method_chain :add_short_filter, :short_operators_fix
+      alias_method_chain :validate, :short_operators_fix
+      alias_method_chain :sql_for_field, :short_operators_fix
     end
     
   end 
@@ -58,14 +58,14 @@ module ShortOperatorsFix
   module InstanceMethods
 
     
-    def after_initialize_with_custom_fields_api
+    def after_initialize_with_short_operators_fix
       self.filters ? self.filters["status_id"][:operator] = "o=" : self.filters = { 'status_id' => {:operator => "o=", :values => [""]} }
       # Store the fact that project is nil (used in #editable_by?)
       @is_for_all = project.nil?
     end
     
     # Helper method to generate the WHERE sql for a +field+, +operator+ and a +value+
-    def sql_for_field_with_custom_fields_api(field, operator, value, db_table, db_field, is_custom_filter=false)
+    def sql_for_field_with_short_operators_fix(field, operator, value, db_table, db_field, is_custom_filter=false)
       sql = ''
       case operator
       when "="
@@ -127,7 +127,7 @@ module ShortOperatorsFix
     end
     
     
-    def validate_with_custom_fields_api
+    def validate_with_short_operators_fix
       filters.each_key do |field|
         errors.add label_for(field), :blank unless
           # filter requires one or more values
@@ -138,7 +138,7 @@ module ShortOperatorsFix
     end
 
     
-    def add_short_filter_with_custom_fields_api(field, expression)
+    def add_short_filter_with_short_operators_fix(field, expression)
       return unless expression
       parms = expression.scan(/^(=|o=|c=|!\*|!|\*)?(.*)$/).first
       add_filter field, (parms[0] || "="), [parms[1] || ""]
